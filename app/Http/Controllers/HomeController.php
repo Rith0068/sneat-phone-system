@@ -67,6 +67,8 @@ class HomeController extends Controller
       $orders = Order::limit(5)->orderBy('order_date', 'desc')->get();
       $loanPayments = collect(); // empty collection I placed this is the (original$loanPayments = 0;) 
       $loans = 0;
+      $loanPayments = collect();
+      $loans = collect();
       $lateLoans = Loan::has('customer')->with('customer')->latePayment()->limit(5)->orderBy('next_payment_date', 'desc')->get();
 
       return view('home', [

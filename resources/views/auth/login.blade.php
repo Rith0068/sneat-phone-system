@@ -47,9 +47,7 @@
                                     <div class="card-body">
                                     <!-- Logo -->
                                         <div class="app-brand justify-content-center">
-                                            
                                             <img src="{{$company->image_logo ?? '/image.png'}}" alt="logo" width="100px"/>
-                                            
                                         </div>
                                     <!-- /Logo -->
                                     <h4 class="mb-2 text-center">{{ $company->name ?? 'CMy Phone ShopE' }}</h4>

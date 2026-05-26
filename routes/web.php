@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\GurantorController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanPaymentController;
@@ -57,7 +58,7 @@ Route::group([
       Route::get('/loan/daily-pdf', [ReportController::class, 'loanDailyPdf'])->name('loan.daily-pdf');
       Route::get('/profit-loss', [ReportController::class, 'profitLoss'])->name('profit-loss');
       Route::get('/profit-loss/pdf', [ReportController::class, 'profitLossPdf'])->name('profit-loss.pdf');
-      Route::get('/product', [ReportController::class, 'create'])->name('product');
+      Route::get('/product', [ReportController::class, 'product'])->name('product');
       Route::get('/product/pdf', [ReportController::class, 'productPdf'])->name('product.pdf');
       Route::get('/loan/list-loan', [ReportController::class, 'listLoan'])->name('loan.list-loan');
     });
@@ -76,11 +77,13 @@ Route::group([
         Route::post('/profile/update/password', [UserController::class, 'updatePassword'])->name('update.profile.password');
     });
     Route::group(['prefix'=>'order','as'=>'orders.'], function(){
-      Route::get('/order', [OrderController::class, 'index'])->name('index');
+       Route::get('/create', [OrderController::class, 'index'])->name('create');
+      Route::get('/', [OrderController::class, 'index'])->name('index');
     });
     Route::group(['prefix'=>'sale','as'=>'sales.'], function(){
-      Route::get('/sale', [OrderController::class, 'create'])->name('create');
-    
+     Route::get('/create', [OrderController::class, 'index'])->name('create');
+      Route::get('/', [OrderController::class, 'index'])->name('index');
+     
     });
     Route::group(['prefix'=>'cart','as'=>'carts.'], function(){
       Route::post('/store', [CartController::class, 'store'])->name('store');

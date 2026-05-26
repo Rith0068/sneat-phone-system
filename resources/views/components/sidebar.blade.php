@@ -171,7 +171,11 @@
                 @endcan
                 @can('order-list')
                   <li class="menu-item{{ (request()->routeIs('sales.index')) ? ' active' : '' }}">
+<<<<<<< HEAD
                       <a href="{{ route('sales.create', withLang()) }}" class="menu-link">
+=======
+                      <a href="{{ route('sales.index', withLang()) }}" class="menu-link">
+>>>>>>> 8bc7c40bbcd744beef346fc45812ecf5e52d1fe2
                           <div data-i18n="{{__('sidebar.shop.orders.invoices_list')}}">{{__('sidebar.shop.orders.invoices_list')}}</div>
                       </a>
                   </li>
@@ -223,7 +227,11 @@
         <!-- POS Management -->
         @can(['order-create'])
         <li class="menu-item">
+<<<<<<< HEAD
           <a href="{{ route('orders.index', withLang()) }}" class="menu-link">
+=======
+          <a href="{{ route('orders.create', withLang()) }}" class="menu-link">
+>>>>>>> 8bc7c40bbcd744beef346fc45812ecf5e52d1fe2
               <i class="menu-icon tf-icons fa-solid fa-cash-register"></i>
               <div data-i18n="{{__('sidebar.shop.orders.title')}}">{{__('sidebar.shop.orders.title')}}</div>
           </a>
