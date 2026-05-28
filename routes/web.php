@@ -23,6 +23,7 @@ use App\Http\Controllers\StorageController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\NetworkController;
+use Illuminate\Session\Store;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,14 +57,25 @@ Route::group([
       Route::get('/loan', [ReportController::class, 'loan'])->name('loan');
       Route::get('/loan/pdf', [ReportController::class, 'loanPdf'])->name('loan.pdf');
       Route::get('/loan/daily-pdf', [ReportController::class, 'loanDailyPdf'])->name('loan.daily-pdf');
-      Route::get('/profit-loss', [ReportController::class, 'profitLoss'])->name('profit-loss');
-      Route::get('/profit-loss/pdf', [ReportController::class, 'profitLossPdf'])->name('profit-loss.pdf');
+     Route::prefix('reports')->group(function () {
+
+    Route::get('/profit-loss', [ReportController::class, 'profitLoss'])
+        ->name('profit-loss');
+
+    Route::get('/profit-loss/pdf', [ReportController::class, 'profitLossPdf'])
+        ->name('profit-loss.pdf');
+
+});
       Route::get('/product', [ReportController::class, 'product'])->name('product');
       Route::get('/product/pdf', [ReportController::class, 'productPdf'])->name('product.pdf');
       Route::get('/loan/list-loan', [ReportController::class, 'listLoan'])->name('loan.list-loan');
     });
     Route::resource('roles', RoleController::class);
-    Route::resource('products', ProductController::class);
+    Route::group(['prefix' => 'products', 'as' => 'products.'], function(){
+        Route::get('/', [ProductController::class, 'index'])->name('index');
+        Route::post('/store', [ProductController::class, 'store'])->name('store');
+        Route::get('/create', [ProductController::class, 'index'])->name('create');
+    });
     Route::group(['prefix'=>'user','as'=>'users.'], function(){
         Route::get('/', [EmployeeController::class, 'index'])->name('index');
         Route::get('/edit/{id}', [EmployeeController::class, 'edit'])->name('edit');
