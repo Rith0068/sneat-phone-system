@@ -46,7 +46,7 @@
                   <h5 class="card-title"><strong>{{ $product->product_name ?? ''}}</strong> </h5>
                   <p class="card-text">
                     <small class="mx-2">{!! $product->condition_label_badges_name ?? ''!!}</small><small>{!! $product->status_badges_name ?? ''!!}</small>
-                  <!-- <h4 class="mb-1 text-danger text-end"><small class="text-muted"></small>$ {{ $product->selling_price ?? ''}} </h4> -->
+                  <h4 class="mb-1 text-danger text-end"><small class="text-muted"></small>$ {{ $product->selling_price ?? ''}} </h4>
                   <h4 class="mb-1 text-danger text-end"><small class="text-muted"></small>{{ setToStringDolla($product->selling_price ?? 0)}} </h4>
                   <h6 class="mb-1"><small class="text-muted">{{__('product.imei')}} :</small> {{ $product->product_imei ?? ''}} </h6>
                   <h6 class="mb-1"><small class="text-muted">{{__('product.series')}} :</small> {{ $product->series->name ?? ''}} </h6>
