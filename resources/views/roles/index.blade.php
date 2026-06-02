@@ -18,20 +18,20 @@
     <div class="card">
         <h5 class="card-header">List Role</h5>
         <div class="table-responsive text-nowrap">
-            <table class="table mb-5">
+            <table class="table mb-5 table-hover">
                 <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Name</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+                <tr>
+                    <th class="text-center">No</th>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
                 <tbody class="table-border-bottom-0">
                     @foreach ($roles as $key => $role)
                         <tr>
-                            <td>{{ ++$i }}</td>
-                            <td><strong>{{ $role->name }}</strong></td>
-                            <td>
+                            <td class="text-center">{{ ++$i }}</td>
+                            <td class="text-center"><strong>{{ $role->name }}</strong></td>
+                            <td class="text-center">
                                 @can('role-list')
                                   <a href="{{ route('roles.show', withLang(['role' => $role->id])) }}" class="btn btn-icon btn-outline-secondary">
                                     <i class='bx bxs-spreadsheet'></i>
