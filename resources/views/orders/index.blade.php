@@ -6,12 +6,12 @@
 <!-- Content -->
 <div class="container-fluid flex-grow-1 container-p-y">
     <div class="row">
-        <div class="col-lg-12 mb-3">
+        <div class="col-lg-12 mb-3"></h1>
             <div class="pull-right">
                 @can(['order-create'])
                     <a class="btn btn-outline-primary" href="{{ route('sales.create', withLang()) }}"> <i class='bx bx-plus-circle' ></i> {{ __('order.create_sale')}}</a>
                 @endcan
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productSearchModal">
+                <button type="button" class="btn btn-</h1>primary" data-bs-toggle="modal" data-bs-target="#productSearchModal">
                   <i class='bx bx-search' ></i>
                 </button>
             </div>
@@ -56,7 +56,8 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-icon btn-outline-danger" onclick="return confirm('Are you sure you want to delete this sale?')">
-                                        <span class="tf-icons bx bx-trash"></span>
+                            
+@            <span class="tf-icons bx bx-trash"></span>
                                     </button>
                                 </form>
                           </td>

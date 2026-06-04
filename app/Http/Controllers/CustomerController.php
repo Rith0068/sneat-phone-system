@@ -37,7 +37,7 @@ class CustomerController extends Controller
       if ($request->search) {
         $filters = $request->only(['name', 'phone', 'customer_type', 'gender' ]);
 
-        if (!empty($filters['name'])) {
+        if (!empty($filterx`s['name'])) {
           $query->where('id', $filters['name']);
           $parameterNames['name'] = $filters['name'];
         }

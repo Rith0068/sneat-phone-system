@@ -32,7 +32,9 @@ class OrderController extends Controller
    */
   public function index(Request $request)
   {
-    
+
+    $customers = Customer::all();
+    $query = Order::query();
     $parameterNames = [];
     if ($request->search) {
         $filters = $request->only(['customer', 'from_date', 'to_date']);
@@ -63,7 +65,7 @@ class OrderController extends Controller
     return view('orders.index', compact(
       'orders',
       'customers',
-      'parameterNames'
+      'parameterNames',
     ));
   }
 
@@ -120,5 +122,35 @@ class OrderController extends Controller
       $file_pdf = 'invoice-'.str_pad($order->id, 5, '0', STR_PAD_LEFT).'.pdf';
       $type = $request->type ?? 'download';
       return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate' ,'file_pdf', 'type'));
+    }
+    public function ordrCreate(Request $request){
+        $apple = Brand::where('name', 'Apple')->get();
+        $products = Product::query()->get();
+        $product = Product::find($request->product_id);
+        return view('orders.create', compact(
+            'products', 
+            'product',
+            'apple',
+        ));
+    }
+    public function storeOrder(Request $request){
+        $productId =  $request->product_id ;
+        $productName = $request->product_name;
+        $productImei = $request->product_imei; 
+        $productNote = $request->product_note;
+        $productStorage = $request->product_storage;
+        $productColor = $request->product_color;
+        $productPrice = $request->product_price;
+        return response()->json([
+            'success' => true,
+            'message' => 'Product added to cart!',
+            'product_id' => $productId,
+            'product_name' => $productName,
+            'product_imei' => $productImei,
+            'product_note '=> $productNote,
+            'product_storage' => $productStorage,
+            'product_color' => $productColor,
+            'product_price' => $productPrice
+        ]);
     }
 }
