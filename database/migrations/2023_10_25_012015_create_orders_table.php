@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->references('id')->on('customers')->cascadeOnDelete()->comment('customers.id');
-            $table->foreignId('employee_id')->references('id')->on('employees')->cascadeOnDelete()->comment('employees.id');
+            $table->foreignId('customer_id')->nullable()->references('id')->on('customers')->cascadeOnDelete();
+            $table->foreignId('employee_id')->nullable()->references('id')->on('employees')->cascadeOnDelete();
             $table->string('total_amount');
             $table->integer('status')->default(1)->comment('1:ACTIVE, 2:INACTIVE');
             $table->integer('payment_status')->default(1)->comment('1:PAID, 2:UNPAID');

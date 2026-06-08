@@ -18,7 +18,9 @@
         
         <div>
                 <x-order.right 
-                :product="$product"/>
+                :product="$product"
+                :customers="$customers"
+                />
         </div>
         
         

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Employee;
 use App\Models\Brand;
 use App\Models\Series;
 use App\Models\Color;
@@ -124,6 +125,7 @@ class OrderController extends Controller
       return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate' ,'file_pdf', 'type'));
     }
     public function ordrCreate(Request $request){
+        $customers = Customer::all();
         $apple = Brand::where('name', 'Apple')->get();
         $products = Product::query()->get();
         $product = Product::find($request->product_id);
@@ -131,7 +133,44 @@ class OrderController extends Controller
             'products', 
             'product',
             'apple',
+            'customers'
         ));
+    }
+    public function store(Request $request)
+    {
+        $request->validate([
+            'customer_id' => 'nullable|exists:customers,id',
+            'items'       => 'required|array|min:1',
+            'items.*.id'  => 'required|exists:products,id',
+        ]);
+
+        $employee = Employee::where('user_id', auth()->id())->first();
+
+        $order = Order::create([
+            'customer_id' => $request->customer_id ?? null,
+            'employee_id' => $employee?->id ?? null,
+            'status'         => Order::STATUS_ACTIVE,
+            'payment_status' => Order::PAYMENT_STATUS_UNPAID,
+            'payment_type'   => Order::PAYMENT_TYPE_CASH,
+            'total_amount'   => collect($request->items)->sum('price'),
+            'order_date'     => now(),
+            'note'           => $request->note ?? null,
+        ]);
+
+        foreach ($request->items as $item) {
+            OrderDetail::create([
+                'order_id'   => $order->id,
+                'product_id' => $item['id'],
+                'unit_price' => $item['price'],
+            ]);
+
+            
+        }
+
+        return response()->json([
+            'success'  => true,
+            'redirect' => route('orders.show', ['lang' => app()->getLocale(), 'order' => $order->id]),
+        ]);
     }
     public function storeOrder(Request $request){
         $productId =  $request->product_id ;

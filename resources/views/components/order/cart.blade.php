@@ -183,7 +183,7 @@ $(function () {
         $btn.prop('disabled', true).text('Adding...');
 
         $.ajax({
-            url: '{{ route("orders.store", ["lang" => app()->getLocale()]) }}',
+            url: '{{ route("orders.add", ["lang" => app()->getLocale()]) }}',
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

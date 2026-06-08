@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<div class="block shadow-2xl w-80 px-5 py-5 flex flex-col h-screen">
+<div class="block shadow-2xl w-80 xl:px-5 md:px-3 xl:py-5 flex flex-col xl:h-screen md:h-screen ">
 
     {{-- Header --}}
     <div>
@@ -13,9 +13,11 @@
     {{-- Customer select --}}
     <div class="mt-2 text-[18px] flex gap-3 items-center">
         <i class="fa-solid fa-user mt-1 text-gray-500"></i>
-        <select class="border px-3 py-1 w-full text-sm">
-            <option>Koem Sothearith</option>
-            <option>Dara</option>
+        <select class="border px-3 py-1 xl:w-full md:w-50 text-sm" id="customerSelect">
+            <option value="">-- Select Customer --</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+            @endforeach
         </select>
     </div>
 
@@ -175,45 +177,56 @@ $(function () {
 
     $('#submitOrderBtn').on('click', function () {
         const items = loadCart();
+
         if (items.length === 0) {
             alert('Cart is empty!');
             return;
         }
 
+        // Disable button to prevent double submit
+        $('#submitOrderBtn').prop('disabled', true).text('Submitting...');
+
         $.ajax({
             url: '{{ route("orders.store", ["lang" => app()->getLocale()]) }}',
             method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            data: { items: items },
-            success: function () {
-                clearCart();
-                orderTotal = 0;
-                $('#orderTotal').text('$0.00');
-                $('#orderItems').html(`
-                    <div id="emptyState" class="text-center py-10 text-gray-400">
-                        <i class="fa-solid fa-cart-shopping text-3xl mb-2 block"></i>
-                        <p class="text-sm">No products yet.</p>
-                    </div>
-                `);
-
-                const activeBrand = $('.nav-btn.bg-blue-500').data('brand') || 'all';
-                $('.product-card').each(function () {
-                    const cardBrand = String($(this).data('brand') || '').toLowerCase();
-                    if (activeBrand === 'all' || cardBrand === activeBrand) {
-                        $(this).fadeIn(300);
-                    }
-                });
-
-                alert('Order submitted successfully!');
+            contentType: 'application/json',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: JSON.stringify({
+                customer_id: $('#customerSelect').val() || null,
+                note:        $('#orderNote').val()       || null,
+                items:       items,
+            }),
+            success: function (res) {
+                if (res.success) {
+                    clearCart();
+                    orderTotal = 0;
+                    $('#orderTotal').text('$0.00');
+                    $('#orderItems').html(`
+                        <div id="emptyState" class="text-center py-10 text-gray-400">
+                            <i class="fa-solid fa-cart-shopping text-3xl mb-2 block"></i>
+                            <p class="text-sm">No products yet.</p>
+                        </div>
+                    `);
+                    window.location.href ="{{ route('orders.show', ['lang' => app()->getLocale()]) }}";
+                }
             },
             error: function (xhr) {
-                console.error(xhr.responseText);
-                alert('Submit failed!');
+                $('#submitOrderBtn').prop('disabled', false).text('Submit Order');
+
+                // Show exact validation errors if any
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    let msg = '';
+                    $.each(errors, function (key, val) {
+                        msg += val[0] + '\n';
+                    });
+                    alert('Validation Error:\n' + msg);
+                } else {
+                    console.error(xhr.responseText);
+                    alert('Submit failed! Check console.');
+                }
             }
         });
     });
-
 });
 </script>
