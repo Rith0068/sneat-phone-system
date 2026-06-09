@@ -33,7 +33,7 @@ class OrderController extends Controller
   public function index(Request $request)
   {
     $customers = Customer::all();
-    dd($customers);
+   
     
     $query = Order::where('order_date', 'desc');
     $parameterNames = [];
