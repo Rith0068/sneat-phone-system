@@ -35,4 +35,30 @@
         'order_date' => 'Order Date',
         'total' => 'Total',
         'series' => 'Series',
+
+    
+        
+        'create_sale' => 'Register Sale',
+        'sale_date' => 'Sale Date',
+        'customer' => 'Customer',
+        'walk_in_customer' => 'Walk in Customer',
+
+        'product_name' => 'Product Name',
+        'product_imei' => 'Product IMEI',
+        'product_detail' => 'Product Detail',
+
+        'select_product' => 'Select Order Product',
+
+        'price' => 'Price',
+        'total' => 'Total',
+        'actions' => 'Actions',
+
+        'note' => 'Note',
+
+        'submit_order' => 'Submit Order',
+        'cancel' => 'Cancel',
+
+        'remove' => 'Remove',
+        'no_data' => 'No Data Available',
+
     ];

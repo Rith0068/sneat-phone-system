@@ -33,6 +33,8 @@ class OrderController extends Controller
   public function index(Request $request)
   {
     $customers = Customer::all();
+    dd($customers);
+    
     $query = Order::where('order_date', 'desc');
     $parameterNames = [];
     if ($request->search) {
@@ -95,8 +97,23 @@ class OrderController extends Controller
         }
         return response()->json(['message' => 'Submiting Order'], 201);
     }
+    public function store(Request $request)
+{  dd($request);
+    Order::create([
+
+        'name' => $request->name,
+        'customer_id' => $request->customer_id,
+
+        'employee_id' => $request->employee_id,
+        'update_id' => $request->update_id,
+        'create_id' => $request->create_id
+    ]);
+
+    return redirect()->route('sales.index', ['lang' => app()->getLocale()]);
+}
 
     public function destroy(string $lang, Order $order)
+    
     {
         $orderDetial = OrderDetail::where('order_id', $order->id)->get();
 
@@ -122,7 +139,14 @@ class OrderController extends Controller
       $type = $request->type ?? 'download';
       return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate' ,'file_pdf', 'type'));
     }
-    public function create(Request $request){
-        return redirect()->route('orders.index', ['lang' => app()->getLocale()]);
-    }
+   public function create()
+{
+    $customers = Customer::all();
+    $products = Product::available()->get();
+
+    return view('orders.create', compact(
+        'customers',
+        'products'
+    ));
+}
 }
