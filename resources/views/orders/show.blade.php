@@ -6,7 +6,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
 <div class="min-h-screen bg-gray-100 py-10 px-4">
-    <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-sm">
+    <div class="max-w-full mx-auto bg-white shadow-lg rounded-sm">
 
         {{-- Top action bar --}}
         <div class="flex justify-between items-center px-8 pt-6 pb-4 border-b border-gray-100">
@@ -27,8 +27,8 @@
             {{-- Shop Header --}}
             <div class="flex justify-center text-center mb-6">
                 <div>
-                    <h4 class="text-xl font-bold text-gray-800 mb-1">{{ $nameShope }}</h4>
-                    <p class="text-sm text-gray-500">{{ $detail }}</p>
+                    <h4 class="text-xl font-bold text-gray-800 mb-1">{{ $company->name }}</h4>
+                    <p class="text-sm text-gray-500">{{ $company->detail }}</p>
                 </div>
             </div>
 
@@ -37,18 +37,16 @@
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-phone text-gray-400 w-4"></i>
-                        <span>{{ $phoneNumber }}</span>
+                        <span>{{ $company->phone }}</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-location-pin text-gray-400 w-4"></i>
-                        <span>{{ $address }}</span>
+                        <span>{{ $company->address }}</span>
                     </div>
-                    @if($note)
                     <div class="flex items-start gap-2 mt-1">
                         <i class="fa-solid fa-note-sticky text-gray-400 w-4 mt-0.5"></i>
-                        <span class="text-gray-400 text-xs">{{ $note }}</span>
+                        <span class="text-gray-400 text-xs">{{ $company->default_loan_note }}</span>
                     </div>
-                    @endif
                 </div>
                 <div class="text-right flex flex-col gap-1">
                     <p><span class="text-gray-400">Invoice:</span> <span class="font-semibold">#{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</span></p>
@@ -77,7 +75,7 @@
                 <h5 class="text-lg font-bold text-gray-700 tracking-widest uppercase">Invoice</h5>
             </div>
 
-            {{-- Order Items Table --}}
+            {{-- Order Items Tab{{ $company->default_invoice_note }}le --}}
             <div class="overflow-x-auto mb-6">
                 <table class="w-full text-sm">
                     <thead>
@@ -148,9 +146,7 @@
             {{-- Footer note --}}
             <div class="text-center text-xs text-gray-400 pb-2">
                 <p>Thank you for your purchase!</p>
-                @if($note)
-                    <p class="mt-1">{{ $note }}</p>
-                @endif
+                    <p class="mt-1">{{ $company->default_loan_note }}</p>
             </div>
 
         </div>

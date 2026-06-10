@@ -16,7 +16,7 @@
         <select class="border px-3 py-1 xl:w-full md:w-50 text-sm" id="customerSelect">
             <option value="">-- Select Customer --</option>
             @foreach($customers as $customer)
-                <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                <option value="{{ $customer->id }}" data-name="{{ $customer->name }}">{{ $customer->name }}</option>
             @endforeach
         </select>
     </div>
@@ -177,6 +177,7 @@ $(function () {
 
     $('#submitOrderBtn').on('click', function () {
         const items = loadCart();
+        const $selectedCustomer = $('#customerSelect option:selected');
 
         if (items.length === 0) {
             alert('Cart is empty!');
@@ -192,28 +193,44 @@ $(function () {
             contentType: 'application/json',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             data: JSON.stringify({
-                customer_id: $('#customerSelect').val() || null,
-                note:        $('#orderNote').val()       || null,
-                items:       items,
+                customer_id:   $('#customerSelect').val()       || null,
+                customer_name: $selectedCustomer.data('name')   || null,
+                note:          $('#orderNote').val()             || null,
+                items:         items,
             }),
             success: function (res) {
                 if (res.success) {
+
+                    // ✅ Show all product cards that were hidden (in cart)
+                    items.forEach(function (product) {
+                        $(`.product-card[data-id="${product.id}"]`).show();
+                    });
+
+                    // ✅ Remove empty grid message if cards are now visible
+                    if ($('.product-card:visible').length > 0) {
+                        $('.empty-grid-msg').remove();
+                    }
+
                     clearCart();
                     orderTotal = 0;
                     $('#orderTotal').text('$0.00');
+                    $('#customerSelect').val('');
+
                     $('#orderItems').html(`
                         <div id="emptyState" class="text-center py-10 text-gray-400">
                             <i class="fa-solid fa-cart-shopping text-3xl mb-2 block"></i>
                             <p class="text-sm">No products yet.</p>
                         </div>
                     `);
-                    window.location.href ="{{ route('orders.show', ['lang' => app()->getLocale()]) }}";
+
+                    window.location.href = res.redirect;
                 }
             },
             error: function (xhr) {
-                $('#submitOrderBtn').prop('disabled', false).text('Submit Order');
-
-                // Show exact validation errors if any
+                $('#submitOrderBtn').prop('disabled', false).html(`
+                    <i class="fa-solid fa-paper-plane block text-center mb-1"></i>
+                    Submit Order
+                `);
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
                     let msg = '';

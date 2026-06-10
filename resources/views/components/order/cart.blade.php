@@ -18,6 +18,23 @@
         align-items: center;
     }
 </style>
+<div id="search-bar" style="display:none;">
+    <form action="{{ route('orders.create', ['lang' => app()->getLocale()]) }}" method="get">
+        <div style="display:flex; align-items:center; max-width:480px; background:white; border:0.5px solid #d1d5db; border-radius:10px; overflow:hidden; transition:border-color 0.15s, box-shadow 0.15s;" onfocusin="this.style.borderColor='#378ADD';this.style.boxShadow='0 0 0 3px rgba(55,138,221,0.12)'">
+            <span style="display:flex; align-items:center; padding:0 12px 0 14px; color:#9ca3af; pointer-events:none;">
+                <i class="fa-solid fa-magnifying-glass" style="font-size:14px;"></i>
+            </span>
+            <input
+                type="search"
+                name="search"
+                value="{{ $search ?? '' }}"
+                placeholder="Search your type phone…"
+                style="flex:1; border:none; outline:none; background:transparent; padding:10px 0; font-size:14px; color:#111827;"
+            >
+            <button type="submit"></button>
+        </div>
+    </form>
+</div>
 
 {{-- PRODUCT GRID --}}
 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 pr-6 mt-6 p-0">

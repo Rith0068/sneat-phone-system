@@ -261,8 +261,13 @@
                                                   <div class="avatar avatar-sm me-2"><img src="{!! $order->customer->profile_image ?? '' !!}" alt="Avatar" class="rounded-circle"></div>
                                               </div>
                                               <div class="d-flex flex-column">
-                                                  <a href="{{ route('customers.show', withLang(['id' => $order->customer_id]))}}" class="text-body text-truncate fw-medium">{{ $order->customer_name ?? ''}}</a>
-                                              </div>
+                                                @if($order->customer_id)
+                                                    <a href="{{ route('customers.show', withLang(['id' => $order->customer_id]))}}" 
+                                                    class="text-body text-truncate fw-medium">{{ $order->customer_name ?? '' }}</a>
+                                                @else
+                                                    <span class="text-body text-truncate fw-medium">{{ $order->customer_name ?? '' }}</span>
+                                                @endif
+                                            </div>
                                           </div>
                                       </td>
                                       <td>{{ setToStringDolla($order->total_amount ?? 0)}}</td>

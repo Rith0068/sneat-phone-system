@@ -12,6 +12,7 @@ use App\Models\ModelType;
 use App\Models\Storage;
 use App\Models\Customer;
 use App\Models\Cart;
+use App\Models\CompanySetting;
 use App\Models\OrderDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,76 +21,76 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
-  function __construct()
-  {
-      $this->middleware('auth');
-      $this->middleware('permission:order-list|order-create|order-edit|order-delete', ['only' => ['index','store']]);
-      $this->middleware('permission:order-create', ['only' => ['create','store']]);
-      $this->middleware('permission:order-edit', ['only' => ['edit','update']]);
-      $this->middleware('permission:order-delete', ['only' => ['destroy']]);
-  }
-  /**
-   * Display a listing of the resource.
-   */
-  public function index(Request $request)
-  {
-
-    $customers = Customer::all();
-    $query = Order::query();
-    $parameterNames = [];
-    if ($request->search) {
-        $filters = $request->only(['customer', 'from_date', 'to_date']);
-
-        if (!empty($filters['customer'])) {
-            $query->where('customer_id', $filters['customer']);
-            $parameterNames['customer'] = $filters['customer'];
-        }
-
-        if (!empty($filters['from_date']) && !empty($filters['to_date'])) {
-            // Both from_date and to_date are provided
-            $query->whereBetween('order_date', [$filters['from_date'], $filters['to_date']]);
-            $parameterNames['from_date'] = $filters['from_date'];
-            $parameterNames['to_date'] = $filters['to_date'];
-        } elseif (!empty($filters['from_date'])) {
-            // Only from_date is provided
-            $query->where('order_date', '>=', $filters['from_date']);
-            $parameterNames['from_date'] = $filters['from_date'];
-        } elseif (!empty($filters['to_date'])) {
-            // Only to_date is provided
-            $query->where('order_date', '<=', $filters['to_date']);
-            $parameterNames['to_date'] = $filters['to_date'];
-        }
+    function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:order-list|order-create|order-edit|order-delete', ['only' => ['index', 'store']]);
+        $this->middleware('permission:order-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:order-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:order-delete', ['only' => ['destroy']]);
     }
 
-    $orders = $query->orderBy('order_date', 'desc')->paginate(20);
-    session(['printInvoiceId' => null]);
-    return view('orders.index', compact(
-      'orders',
-      'customers',
-      'parameterNames',
-    ));
-  }
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $customers = Customer::all();
+        $query = Order::query();
+        $parameterNames = [];
 
-     /**
+        if ($request->search) {
+            $filters = $request->only(['customer', 'from_date', 'to_date']);
+
+            if (!empty($filters['customer'])) {
+                $query->where('customer_id', $filters['customer']);
+                $parameterNames['customer'] = $filters['customer'];
+            }
+
+            if (!empty($filters['from_date']) && !empty($filters['to_date'])) {
+                $query->whereBetween('order_date', [$filters['from_date'], $filters['to_date']]);
+                $parameterNames['from_date'] = $filters['from_date'];
+                $parameterNames['to_date'] = $filters['to_date'];
+            } elseif (!empty($filters['from_date'])) {
+                $query->where('order_date', '>=', $filters['from_date']);
+                $parameterNames['from_date'] = $filters['from_date'];
+            } elseif (!empty($filters['to_date'])) {
+                $query->where('order_date', '<=', $filters['to_date']);
+                $parameterNames['to_date'] = $filters['to_date'];
+            }
+        }
+
+        $orders = $query->orderBy('order_date', 'desc')->paginate(20);
+        session(['printInvoiceId' => null]);
+
+        return view('orders.index', compact(
+            'orders',
+            'customers',
+            'parameterNames',
+        ));
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show(string $lang, Order $order)
     {
-        $order = $order->with('orderDetails', 'customer', 'employee')->findOrfail($order->id);
-        $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
-        return view('orders.show', compact('order', 'order_detals'));
+        $company = CompanySetting::first();
+        $order->load('customer', 'employee');
+
+        $order_details = OrderDetail::where('order_id', $order->id)
+            ->with('product.storage', 'product.color')
+            ->get();
+
+        return view('orders.show', compact('order', 'order_details', 'company'));
     }
 
-
     /**
-     * * Display the specified resource.
-     * */
+     * Check product availability before submitting order.
+     */
     public function checkProductOrder(Request $request)
     {
-        // Attach order details to the order
-        foreach ($request->productIds as $key => $productId) {
-
-            // Check if the product is available
+        foreach ($request->productIds as $productId) {
             $product = Product::available()->find($productId);
             if (!$product) {
                 return response()->json(['message' => 'Product not found.'], 404);
@@ -98,45 +99,79 @@ class OrderController extends Controller
         return response()->json(['message' => 'Submiting Order'], 201);
     }
 
+    /**
+     * Remove the specified order.
+     */
     public function destroy(string $lang, Order $order)
     {
-        $orderDetial = OrderDetail::where('order_id', $order->id)->get();
+        OrderDetail::where('order_id', $order->id)->delete();
+        $order->delete();
 
-      return redirect()->route('sales.index', withLang())->with('success', 'Sale deleted successfully');
+        return redirect()->route('sales.index', withLang())->with('success', 'Sale deleted successfully');
     }
 
-     /**
-     * Display the specified resource.
+    /**
+     * Display the invoice view.
      */
     public function invoice(string $lang, Order $order)
     {
-        $order = $order->with('orderDetails', 'customer', 'employee')->findOrfail($order->id);
+        $order->load('orderDetails', 'customer', 'employee');
         $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
+
         return view('orders.invoice', compact('order', 'order_detals'));
     }
 
+    /**
+     * Display the PDF invoice view.
+     */
     public function invoicePdf(Request $request, string $lang, Order $order)
     {
-      $currentDate = Carbon::now()->format('Y-m-d');
-      $order = $order->with('orderDetails', 'customer', 'employee')->findOrfail($order->id);
-      $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
-      $file_pdf = 'invoice-'.str_pad($order->id, 5, '0', STR_PAD_LEFT).'.pdf';
-      $type = $request->type ?? 'download';
-      return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate' ,'file_pdf', 'type'));
+        $currentDate = Carbon::now()->format('Y-m-d');
+        $order->load('orderDetails', 'customer', 'employee');
+        $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
+        $file_pdf = 'invoice-' . str_pad($order->id, 5, '0', STR_PAD_LEFT) . '.pdf';
+        $type = $request->type ?? 'download';
+
+        return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate', 'file_pdf', 'type'));
     }
-    public function ordrCreate(Request $request){
+
+    /**
+     * Show the form for creating a new order.
+     */
+    public function create(Request $request)
+    {
         $customers = Customer::all();
         $apple = Brand::where('name', 'Apple')->get();
-        $products = Product::query()->get();
-        $product = Product::find($request->product_id);
+
+        $query = Product::query();
+
+        $search = $request->search;
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('product_code', 'like', "%{$search}%")
+                    ->orWhere('product_name', 'like', "%{$search}%")
+                    ->orWhere('product_imei', 'like', "%{$search}%")
+                    ->orWhere('selling_price', 'like', "%{$search}%");
+            });
+        }
+
+        $products = $query->get();
+
+        $product = $request->product_id ? Product::find($request->product_id) : null;
+
         return view('orders.create', compact(
-            'products', 
+            'products',
             'product',
             'apple',
-            'customers'
+            'customers',
+            'search'
         ));
     }
-    public function store(Request $request)
+
+    /**
+     * Store a newly created order.
+     */
+    public function store(Request $request, string $lang)
     {
         $request->validate([
             'customer_id' => 'nullable|exists:customers,id',
@@ -146,15 +181,17 @@ class OrderController extends Controller
 
         $employee = Employee::where('user_id', auth()->id())->first();
 
+        $totalAmount = array_sum(array_column($request->items, 'price'));
+
         $order = Order::create([
-            'customer_id' => $request->customer_id ?? null,
-            'employee_id' => $employee?->id ?? null,
+            'customer_id'    => $request->customer_id,
+            'employee_id'    => $employee?->id,
             'status'         => Order::STATUS_ACTIVE,
             'payment_status' => Order::PAYMENT_STATUS_UNPAID,
             'payment_type'   => Order::PAYMENT_TYPE_CASH,
-            'total_amount'   => collect($request->items)->sum('price'),
+            'total_amount'   => $totalAmount,
             'order_date'     => now(),
-            'note'           => $request->note ?? null,
+            'note'           => $request->note,
         ]);
 
         foreach ($request->items as $item) {
@@ -163,33 +200,29 @@ class OrderController extends Controller
                 'product_id' => $item['id'],
                 'unit_price' => $item['price'],
             ]);
-
-            
         }
 
         return response()->json([
             'success'  => true,
-            'redirect' => route('orders.show', ['lang' => app()->getLocale(), 'order' => $order->id]),
+            'redirect' => route('orders.show', ['lang' => $lang, 'order' => $order->id])
         ]);
     }
-    public function storeOrder(Request $request){
-        $productId =  $request->product_id ;
-        $productName = $request->product_name;
-        $productImei = $request->product_imei; 
-        $productNote = $request->product_note;
-        $productStorage = $request->product_storage;
-        $productColor = $request->product_color;
-        $productPrice = $request->product_price;
+
+    /**
+     * Add a product to the cart (returns JSON).
+     */
+    public function storeOrder(Request $request)
+    {
         return response()->json([
-            'success' => true,
-            'message' => 'Product added to cart!',
-            'product_id' => $productId,
-            'product_name' => $productName,
-            'product_imei' => $productImei,
-            'product_note '=> $productNote,
-            'product_storage' => $productStorage,
-            'product_color' => $productColor,
-            'product_price' => $productPrice
+            'success'         => true,
+            'message'         => 'Product added to cart!',
+            'product_id'      => $request->product_id,
+            'product_name'    => $request->product_name,
+            'product_imei'    => $request->product_imei,
+            'product_note'    => $request->product_note,
+            'product_storage' => $request->product_storage,
+            'product_color'   => $request->product_color,
+            'product_price'   => $request->product_price,
         ]);
     }
 }

@@ -12,11 +12,12 @@
     </div>
 
     {{-- Search --}}
-    <button type="button" onclick="setActive(this)" data-brand="all"
+    <button type="button" onclick="openSearch(this)" data-brand="search"
         class="nav-btn flex gap-1 items-center justify-center my-3 px-5 py-2 w-full rounded-lg shadow-xl border border-gray-300 text-gray-600 transition-all duration-150">
         <i class="fa-solid fa-magnifying-glass text-[15px]"></i>
         <p class="text-sm">Search</p>
     </button>
+    
 
     {{-- All Phone --}}
     <button type="button" onclick="setActive(this)" data-brand="all"
@@ -96,4 +97,33 @@ function filterProducts(brand) {
         `);
     }
 }
+function openSearch(el) {
+    const isActive = $(el).hasClass('bg-blue-500');
+
+    // Reset all nav buttons
+    $('.nav-btn').each(function () {
+        $(this)
+            .removeClass('bg-blue-500 text-white border-blue-500')
+            .addClass('border-gray-300 text-gray-600');
+        $(this).find('i, p').css('color', '');
+    });
+
+    if (isActive) {
+        // Clicking Search again → hide it and deactivate
+        $('#search-bar').slideUp(200);
+        return;
+    }
+
+    // Activate the button
+    $(el)
+        .addClass('bg-blue-500 text-white border-blue-500')
+        .removeClass('border-gray-300 text-gray-600');
+    $(el).find('i, p').css('color', 'white');
+
+    // Show the search bar and focus it
+    $('#search-bar').slideDown(200, function () {
+        $('input[name="search"]').focus().select();
+    });
+}
+
 </script>
