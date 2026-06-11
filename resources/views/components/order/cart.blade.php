@@ -51,14 +51,13 @@
             data-color="{{ $product->color->name ?? '' }}"
             data-price="{{ (float)($product->selling_price ?? 0) }}"
             data-brand="{{ strtolower($product->brand->name ?? 'other') }}"
-            data-image="{{ $product->image ? asset('storage/' . $product->image) : asset('assets/img/blank-profile.png') }}"
+            data-image="{{ $product->image ?? asset('assets/img/blank-profile.png') }}"
         >
             <div class="flex justify-center overflow-hidden">
                 <img
                     class="w-40 h-50 object-contain"
-                    src="{{ $product->image ? asset('storage/' . $product->image) : asset('assets/img/blank-profile.png') }}"
+                    src="{{ $product->image ?? asset('assets/img/blank-profile.png') }}"
                     alt="{{ $product->product_name }}"
-                    onerror="this.src='{{ asset('assets/img/blank-profile.png') }}'"
                 >
             </div>
             <div class="px-4 py-3 block gap-1">
@@ -73,7 +72,7 @@
                 <div class="flex justify-start text-start">
                     <p class="text-gray-500 text-xs leading-relaxed line-clamp-2">
                         @if($product->note){{ $product->note }}, @endif
-                        {{ $product->product_name }}
+                        @if($product->brand){{ $product->brand->name }} @endif
                         @if($product->storage), {{ $product->storage->name }}@endif
                         @if($product->color), {{ $product->color->name }}@endif
                     </p>
@@ -103,8 +102,7 @@
                 id="modalImage"
                 src=""
                 class="w-36 h-36 object-contain"
-                alt=""
-                onerror="this.src='{{ asset('assets/img/blank-profile.png') }}'"
+
             >
         </div>
 

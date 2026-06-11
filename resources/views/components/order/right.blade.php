@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<div class="block shadow-2xl w-80 xl:px-5 md:px-3 xl:py-5 flex flex-col xl:h-screen md:h-screen ">
+<div class="block shadow-2xl w-80 xl:px-5 md:px-3 xl:py-5 flex flex-col xl:h-screen ">
 
     {{-- Header --}}
     <div>
@@ -13,12 +13,16 @@
     {{-- Customer select --}}
     <div class="mt-2 text-[18px] flex gap-3 items-center">
         <i class="fa-solid fa-user mt-1 text-gray-500"></i>
-        <select class="border px-3 py-1 xl:w-full md:w-50 text-sm" id="customerSelect">
-            <option value="">-- Select Customer --</option>
-            @foreach($customers as $customer)
-                <option value="{{ $customer->id }}" data-name="{{ $customer->name }}">{{ $customer->name }}</option>
-            @endforeach
-        </select>
+        <div class="flex flex-col xl:w-full">
+            <select class="border px-3 py-1 xl:w-full md:w-50 text-sm" id="customerSelect">
+                <option value="">-- Select Customer --</option>
+                @foreach($customers as $customer)
+                    <option value="{{ $customer->id }}" data-name="{{ $customer->name }}">{{ $customer->name }}</option>
+                @endforeach
+            </select>
+            {{-- Error message --}}
+            <span id="customerError" class="text-red-500 text-xs mt-1 hidden">Please select a customer.</span>
+        </div>
     </div>
 
     {{-- Order items --}}
@@ -175,17 +179,42 @@ $(function () {
         }
     });
 
+    // ✅ Remove error when customer is selected
+    $('#customerSelect').on('change', function () {
+        if ($(this).val()) {
+            $(this).removeClass('border-red-500');
+            $('#customerError').addClass('hidden');
+        }
+    });
+
     $('#submitOrderBtn').on('click', function () {
         const items = loadCart();
+        const customerId = $('#customerSelect').val();
         const $selectedCustomer = $('#customerSelect option:selected');
 
+        // ✅ Validate customer
+        if (!customerId) {
+            $('#customerSelect').addClass('border-red-500');
+            $('#customerError').removeClass('hidden');
+            $('#customerSelect').focus();
+            return;
+        }
+
+        // ✅ Validate cart
         if (items.length === 0) {
             alert('Cart is empty!');
             return;
         }
 
+        // ✅ Clear customer error if valid
+        $('#customerSelect').removeClass('border-red-500');
+        $('#customerError').addClass('hidden');
+
         // Disable button to prevent double submit
-        $('#submitOrderBtn').prop('disabled', true).text('Submitting...');
+        $('#submitOrderBtn').prop('disabled', true).html(`
+            <i class="fa-solid fa-spinner fa-spin block text-center mb-1"></i>
+            Submitting...
+        `);
 
         $.ajax({
             url: '{{ route("orders.store", ["lang" => app()->getLocale()]) }}',
@@ -193,9 +222,10 @@ $(function () {
             contentType: 'application/json',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             data: JSON.stringify({
-                customer_id:   $('#customerSelect').val()       || null,
-                customer_name: $selectedCustomer.data('name')   || null,
-                note:          $('#orderNote').val()             || null,
+                customer_id:   customerId,
+                customer_name: $selectedCustomer.data('name') || null,
+                note:          $('#orderNote').val()           || null,
+                status:        '2',
                 items:         items,
             }),
             success: function (res) {

@@ -67,7 +67,8 @@ class Product extends Model
       'employee_id',
       'purchase_date',
       'status',
-      'note'
+      'note',
+      'image'
   ];
 
     protected $dates = ['purchase_date', 'deleted_at'];

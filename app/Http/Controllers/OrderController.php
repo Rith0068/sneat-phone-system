@@ -30,9 +30,6 @@ class OrderController extends Controller
         $this->middleware('permission:order-delete', ['only' => ['destroy']]);
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $customers = Customer::all();
@@ -70,9 +67,6 @@ class OrderController extends Controller
         ));
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $lang, Order $order)
     {
         $company = CompanySetting::first();
@@ -85,9 +79,6 @@ class OrderController extends Controller
         return view('orders.show', compact('order', 'order_details', 'company'));
     }
 
-    /**
-     * Check product availability before submitting order.
-     */
     public function checkProductOrder(Request $request)
     {
         foreach ($request->productIds as $productId) {
@@ -99,20 +90,23 @@ class OrderController extends Controller
         return response()->json(['message' => 'Submiting Order'], 201);
     }
 
-    /**
-     * Remove the specified order.
-     */
     public function destroy(string $lang, Order $order)
     {
-        OrderDetail::where('order_id', $order->id)->delete();
+        $orderDetails = OrderDetail::where('order_id', $order->id)->get();
+
+        foreach ($orderDetails as $detail) {
+            Product::where('id', $detail->product_id)->update([
+                'status'     => 1,
+            ]);
+        }
         $order->delete();
+        $orderDetails->each(fn($detail) => $detail->update(['deleted_at' => now()]));
+        
+        $order->update(['deleted_at' => now()]);
 
         return redirect()->route('sales.index', withLang())->with('success', 'Sale deleted successfully');
     }
 
-    /**
-     * Display the invoice view.
-     */
     public function invoice(string $lang, Order $order)
     {
         $order->load('orderDetails', 'customer', 'employee');
@@ -121,9 +115,6 @@ class OrderController extends Controller
         return view('orders.invoice', compact('order', 'order_detals'));
     }
 
-    /**
-     * Display the PDF invoice view.
-     */
     public function invoicePdf(Request $request, string $lang, Order $order)
     {
         $currentDate = Carbon::now()->format('Y-m-d');
@@ -135,15 +126,11 @@ class OrderController extends Controller
         return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate', 'file_pdf', 'type'));
     }
 
-    /**
-     * Show the form for creating a new order.
-     */
     public function create(Request $request)
     {
+        $brands = Brand::all();
         $customers = Customer::all();
-        $apple = Brand::where('name', 'Apple')->get();
-
-        $query = Product::query();
+        $query = Product::where('status', 1);
 
         $search = $request->search;
         if ($search) {
@@ -151,26 +138,22 @@ class OrderController extends Controller
                 $q->where('product_code', 'like', "%{$search}%")
                     ->orWhere('product_name', 'like', "%{$search}%")
                     ->orWhere('product_imei', 'like', "%{$search}%")
-                    ->orWhere('selling_price', 'like', "%{$search}%");
+                    ->orWhere('selling_price', 'like', "%{$search}%")
+                    ->orWhereHas('brand', function ($query) use ($search) {$query->where('name', 'like', "%{$search}%");});
             });
         }
 
         $products = $query->get();
-
         $product = $request->product_id ? Product::find($request->product_id) : null;
 
         return view('orders.create', compact(
             'products',
             'product',
-            'apple',
+            'brands',  
             'customers',
             'search'
         ));
     }
-
-    /**
-     * Store a newly created order.
-     */
     public function store(Request $request, string $lang)
     {
         $request->validate([
@@ -200,6 +183,7 @@ class OrderController extends Controller
                 'product_id' => $item['id'],
                 'unit_price' => $item['price'],
             ]);
+            Product::where('id', $item['id'])->update(['status' => 2]);
         }
 
         return response()->json([
@@ -208,9 +192,6 @@ class OrderController extends Controller
         ]);
     }
 
-    /**
-     * Add a product to the cart (returns JSON).
-     */
     public function storeOrder(Request $request)
     {
         return response()->json([

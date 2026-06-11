@@ -22,6 +22,7 @@ use App\Http\Controllers\StorageController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\NetworkController;
+use App\Http\Controllers\GurantorController;
 
 /*
 |--------------------------------------------------------------------------

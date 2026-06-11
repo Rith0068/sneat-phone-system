@@ -30,18 +30,21 @@
         </div>
     </button>
 
-    {{-- Apple --}}
-    <button type="button" onclick="setActive(this)" data-brand="apple"
-        class="nav-btn block my-3 py-3 w-full rounded-lg shadow-xl border border-gray-300 transition-all duration-150">
-        <div class="flex justify-center">
-            <i class="fa-brands fa-apple text-[30px]"></i>
-        </div>
-        <div class="flex justify-center text-[14px] mt-2">
-            <p>Apples</p>
-        </div>
-    </button>
-
-    {{-- បន្ថែម brand ថ្មី copy pattern ខាងលើ ហើយប្តូរ data-brand --}}
+    @foreach ($brands->take(5) as $brand)
+        <button type="button" onclick="setActive(this)" data-brand="{{ strtolower($brand->name) }}"
+            class="nav-btn block my-3 py-3 w-full rounded-lg shadow-xl border border-gray-300 transition-all duration-150">
+            <div class="flex justify-center">
+                @if (strtolower($brand->name) == 'apple')
+                    <i class="fa-brands fa-apple text-[30px]"></i>
+                @else
+                    <i class="fa-solid fa-mobile text-[30px]"></i>
+                @endif
+            </div>
+            <div class="flex justify-center text-[14px] mt-2">
+                <p>{{ $brand->name }}</p>
+            </div>
+        </button>
+    @endforeach
 
 </div>
 

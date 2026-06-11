@@ -8,6 +8,7 @@
                 <x-order.lelf-box 
                 :products="$products"
                 :search="$search"
+                :brands="$brands"
                 />
         </div>
         
