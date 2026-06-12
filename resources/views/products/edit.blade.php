@@ -13,7 +13,7 @@
 
         <div class="">
             <div class="flex gap-10">
-                <img src="{{ asset('assets/img/blank-product.svg') }}" alt="camera" class="max-h-32 ">
+                <img src="{{ $product->image ? asset('images/product/' . $product->image) : asset('assets/img/blank-product.svg') }}"alt="camera" class="max-h-32">
                 <div class=" justify-start gap-4 pt-2">
                     <button type="button" id="cancelBtn"
                         class="w-full sm:w-auto px-6 py-2.5 text-sm font-medium bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200">
@@ -29,83 +29,83 @@
 
         </div>
 
-        <form action="{{ route('products.store', withLang()) }}"
-        method="POST"
-        enctype="multipart/form-data">
+        <form action="{{ route('products.update', ['lang' => app()->getLocale(), 'product' => $product->id]) }}"
+            method="POST"
+            enctype="multipart/form-data">
             @csrf
-
-             @if ($errors->any())
-                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                     <ul class="list-disc pl-5">
-                         @foreach ($errors->all() as $error)
-                             <li>{{ $error }}</li>
-                         @endforeach
-                     </ul>
-                 </div>
-             @endif
+            @method('PUT')
 
             <div class="space-y-4 mt-10">
                 <div class="grid grid-cols-2 gap-2">
                     <div class="">
                         <label for="" class="text-sm font-medium text-gray-500">PRODUCT NAME</label>
-                        <input type="text" name="product_name" placeholder="" required class="w-full px-2 py-2 text-sm border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                        <input type="text"
+                               name="product_name"
+                               value="{{ old('product_name', $product->product_name) }}"
+                               required
+                               class="w-full px-2 py-2 text-sm border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
                     </div>
 
                     <div class="">
                         <label for="" class="text-sm font-medium text-gray-500">PRODUCT IMEI</label>
-                        <input type="text" name="product_imei" placeholder="" required class="w-full px-2 py-2  text-sm border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                        <input type="text" name="product_imei" placeholder="" value="{{ old('product_imei', $product->product_imei) }}" required class="w-full px-2 py-2  text-sm border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div class="">
                         <label for="" class="text-sm font-medium text-gray-500">PRODUCT CODE</label>
-                        <input type="text" name="product_code" placeholder="" required class="w-full px-2 py-2  text-sm border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                        <input type="text" name="product_code" placeholder="" value="{{old('product_code', $product->product_code) }}" required class="w-full px-2 py-2  text-sm border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
                     </div>
 
                     <div class="">
-                        <label class="text-sm font-medium text-gray-500">CONDITION</label>
+                        <label for="" class="text-sm font-medium text-gray-500">CONDITION</label>
+                        <select name="condition_id" required
+                            class="w-full px-2 py-2  text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                            <option value="used">Used</option>
 
-                            <select name="condition" required
-                                class="w-full px-2 py-2 text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                           @foreach ($conditions as $id => $name)
+                               <option value="{{ $id }}"
+                                   {{ old('condition', $product->condition) == $id ? 'selected' : '' }}>
+                                   {{ $name }}
+                               </option>
+                           @endforeach
 
-                                <option value="">Select Condition</option>
-                                @foreach ($conditions as $id => $name)
-                                    <option value="{{ $id }}">
-                                        {{ $name }}
-                                    </option>
-                                @endforeach
-
-                            </select>
+                        </select>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div class="">
                         <label for="" class="text-sm font-medium text-gray-500">BRAND</label>
-                        <select name="brand_id" required
+                        <select name="brand" required
                             class="w-full px-2 py-2  text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
                             <option value="">Select an option</option>
+
                             @foreach($brands as $brand)
-                            <option value="{{ $brand->id }}">
+                            <option value="{{ $brand->id }}"
+                                {{ old('brand', $product->brand_id) == $brand->id ? 'selected' : '' }}>
                                 {{ $brand->name }}
                             </option>
                             @endforeach
+
                         </select>
                     </div>
 
                     <div class="">
                         <label for="" class="text-sm font-medium text-gray-500">SERIES</label>
-                            <select name="series_id" required
-                                class="w-full px-2 py-2 text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
-                                <option value="">Select an option</option>
-                                @foreach($series as $item)
-                                    <option value="{{ $item->id }}">
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
+                        <select name="series" required
+                            class="w-full px-2 py-2  text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                            <option value="">Select an option</option>
 
-                            </select>
+                            @foreach($series as $series)
+                            <option value="{{ $series->id }}"
+                                {{ old('series', $product->series_id) == $series->id ? 'selected' : '' }}>
+                                {{ $series->name }}
+                            </option>
+                            @endforeach
+
+                        </select>
                     </div>
                 </div>
 
@@ -113,18 +113,18 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div class="">
                         <label for="" class="text-sm font-medium text-gray-500">COLOR</label>
-                            <select name="color_id" required
-                                class="w-full px-2 py-2 text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                        <select name="color" required
+                            class="w-full px-2 py-2  text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                            <option value="">Select an option</option>
 
-                                <option value="">Select an option</option>
+                            @foreach($colors as $color)
+                            <option value="{{ $color->id }}"
+                                {{ old('color', $product->color_id) == $color->id ? 'selected' : '' }}>
+                                {{ $color->name }}
+                            </option>
+                            @endforeach
 
-                                @foreach($colors as $color)
-                                    <option value="{{ $color->id }}">
-                                        {{ $color->name }}
-                                    </option>
-                                @endforeach
-
-                            </select>
+                        </select>
                     </div>
 
                     <div class="">
@@ -133,11 +133,12 @@
                             class="w-full px-2 py-2  text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
                             <option value="">Select an option</option>
 
-                            @foreach($modelTypes as $modelType)
-                            <option value="{{ $modelType->id }}">
-                                {{$modelType->name}}
-                            </option>
-                            @endforeach
+                                @foreach ($modelTypes as $id => $name)
+                                    <option value="{{ $id }}"
+                                        {{ old('model_type_id', $product->model_type_id ?? '') == $id ? 'selected' : '' }}>
+                                        {{ $name }}
+                                    </option>
+                                @endforeach
 
                         </select>
                     </div>
@@ -146,45 +147,51 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div class="">
                         <label for="" class="text-sm font-medium text-gray-500">STORAGE</label>
-                        <select name="storage_id" required
+                        <select name="storage" required
                             class="w-full px-2 py-2 text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
                             <option value="">Select an option</option>
 
                             @foreach($storages as $storage)
-                            <option value="{{$storage->id}}">
-                                {{$storage->name}}
+                            <option value="{{ $storage->id }}"
+                                {{ $product->storage_id == $storage->id ? 'selected' : '' }}>
+                                {{ $storage->name }}
                             </option>
                             @endforeach
-                            
+
                         </select>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-sm font-medium text-gray-500">TYPE OF MACHINE</label>                   
-                                <select name="type_of_machine" required
-                                    class="w-full px-2 py-2 text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
-                                    <option value="">Select an option</option>
+                        <div class="">
+                            <label for="" class="text-sm font-medium text-gray-500">TYPE OF MACHINE</label>
+                            <select name="type_of_machine" required
+                                class="w-full px-2 py-2  text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                                <option value="">Select an option</option>
 
-                                    @foreach( $typeOfMachines as $id =>$name)
-                                    <option value=" {{ $id }}">
-                                        {{ $name }}
-                                    </option>
-                                    @endforeach
-                                    
-                                </select>
+                               @foreach ($typeOfMachines as $id => $name)
+                                   <option value="{{ $id }}"
+                                       {{ old('type_of_machine', $product->type_of_machine) == $id ? 'selected' : '' }}>
+                                       {{ $name }}
+                                   </option>
+                               @endforeach
+
+                            </select>
                         </div>
 
                         <div class="">
                             <label for="" class="text-sm font-medium text-gray-500">LOCK BY</label>
                             <select name="network_id" required
-                                class="w-full px-2 py-2  text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                                class="w-full px-2 py-2 text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
+                            
                                 <option value="">Select an option</option>
-                                  @foreach ($networks as $network)
-                                        <option value="{{ $network->id }}">
-                                            {{ $network->name }}
-                                        </option>
-                                    @endforeach
+                            
+                                @foreach ($networks as $id => $name)
+                                    <option value="{{ $id }}"
+                                        {{ old('network_id', $product->network_id ?? '') == $id ? 'selected' : '' }}>
+                                        {{ $name }}
+                                    </option>
+                                @endforeach
+                            
                             </select>
                         </div>
                     </div>
@@ -197,7 +204,7 @@
                             <input
                                 type=""
                                 class="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent"
-                                name="battery_percentage">
+                                name="battery_percentage" value="{{old('battery_percentage', $product->battery_percentage) }}">
 
                         </div>
                     </div>
@@ -207,7 +214,7 @@
                         <input
                             type=""
                             class="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent"
-                            name="percentage">
+                            name="percentage" value="{{old('percentage', $product->percentage) }}">
 
 
                     </div>
@@ -219,7 +226,8 @@
                         <input
                             type=""
                             class="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent"
-                            name="purchase_price">
+                            name="purchase_price" value="{{ old('purchase_price', $product->purchase_price) }}">
+
                     </div>
 
                     <div class="">
@@ -227,7 +235,7 @@
                         <input
                             type=""
                             class="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent"
-                            name="selling_price">
+                            name="selling_price" value="{{old('selling_price', $product->selling_price) }}">
 
                     </div>
                 </div>
@@ -238,7 +246,7 @@
                         <input
                             type="date"
                             class="w-full px-2 py-2 pr-10 text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent"
-                            name="purchase_date">
+                            name="purchase_date" value="{{old('purchase_date', $product->purchase_date) }}">
 
                     </div>
 
@@ -247,11 +255,14 @@
                         <select name="status" required
                             class="w-full px-2 py-2 text-sm text-gray-500 border border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition duration-200 bg-transparent">
                             <option value="">Select an option</option>
-                            @foreach( $status as $id=>$name)
-                            <option value="{{ $id}}">
-                                {{ $name }}
-                            </option>
+
+                            @foreach($statuses as $id => $name)
+                                <option value="{{ $id }}"
+                                    {{ old('status', $product->status) == $id ? 'selected' : '' }}>
+                                    {{ $name }}
+                                </option>
                             @endforeach
+
                         </select>
                     </div>
                 </div>

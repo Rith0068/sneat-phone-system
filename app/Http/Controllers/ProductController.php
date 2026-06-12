@@ -7,9 +7,11 @@ use App\Models\Brand;
 use App\Models\Series;
 use App\Models\Color;
 use App\Models\ModelType;
+use App\Models\Condition;
 use App\Models\Network;
 use App\Models\Storage;
 use App\Http\Requests\ProductRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -30,7 +32,7 @@ class ProductController extends Controller
   public function index(Request $request)
   {
     $products = Product::all(); // get all data from DB
-    
+
     $query = Product::query()->with('network');
 
     $brands = Brand::pluck('name', 'id');
@@ -40,7 +42,7 @@ class ProductController extends Controller
     $storage = Storage::pluck('name', 'id');
 
     $type_of_machines = Product::TYPE_OF_MACHINE;
-    $conditions = Product::CONDITION;
+    $conditions = Product::CONDITIONS;
     $status = Product::getStatuses();
 
     $parameterNames = [];
@@ -87,49 +89,65 @@ class ProductController extends Controller
    */
   public function create()
   {
-    return view('products.create');
+    $brands = Brand::all();
+    $series = Series::all();
+    $colors = Color::all();
+    $modelTypes = ModelType::all();
+    $storages = Storage::all();
+    $conditions = Product::CONDITIONS;
+    $networks = Network::all();
+    $typeOfMachines = Product::TYPE_OF_MACHINE;
+    $status = Product::getStatuses();
+    return view('products.create', compact('brands', 'series', 'colors', 'modelTypes', 'storages', 'conditions', 'networks', 'typeOfMachines', 'status'));
   }
 
   /**
    * Store a newly created resource in storage.
    */
-  public function store(ProductRequest $request)
-  {
-    $product = new Product();
-    $product->product_code = $request->product_code ?? '';
-    $product->product_name = $request->product_name;
-    $product->product_imei = $request->product_imei;
-    $product->brand_id = $request->brand;
-    $product->series_id = $request->series;
-    $product->color_id = $request->color;
-    $product->model_type_id = $request->model_type;
-    $product->condition = $request->condition;
-    $product->storage_id = $request->storage;
-    $product->type_of_machine = $request->type_of_machine;
-    $product->network_id = $request->network;
-    $product->battery_percentage = $request->battery_percentage;
-    $product->percentage = $request->percentage;
-    $product->purchase_price = $request->purchase_price;
-    $product->selling_price = $request->selling_price;
-    $product->employee_id = Auth::user()->id;
-    $product->purchase_date = $request->purchase_date;
-    $product->image = '';
-    $product->status = $request->status;
-    $product->note = $request->note ?? '';
+ public function store(ProductRequest $request)
+    {
+       
+      $product = new Product();
+      $product->product_code = $request->product_code ?? '';
+      $product->product_name = $request->product_name;
+      $product->product_imei = $request->product_imei;
+      
+      // FIXED: Adjusted from request field names (brand_id, series_id, etc.)
+      $product->brand_id = $request->brand_id;
 
-    $product->save();
-    if ($image = $request->file('image')) {
-      $destinationPath = 'images/product/';
-      $formattedNumber = str_pad($product->id, 5, '0', STR_PAD_LEFT);
-      $filename = $image->getClientOriginalName();
-      $productImage = $formattedNumber . "_" . md5($filename . time()) . "." . $image->getClientOriginalExtension();
-      $image->move($destinationPath, $productImage);
-      $product->image = $productImage;
+      $product->series_id = $request->series_id;
+      $product->color_id = $request->color_id;
+      $product->condition = $request->condition;
+      $product->storage_id = $request->storage_id;
+      $product->model_type_id = $request->model_type_id;
+        
+      $product->network_id = $request->network_id;
+      $product->battery_percentage = $request->battery_percentage;
+      $product->percentage = $request->percentage;
+      $product->purchase_price = $request->purchase_price;
+      $product->selling_price = $request->selling_price;
+      $product->employee_id = Auth::user()->id;
+      $product->purchase_date = $request->purchase_date;
+      $product->image = '';
+      $product->status = $request->status;
+      $product->type_of_machine = $request->type_of_machine;
+      $product->note = $request->note ?? '';
+
       $product->save();
+
+      
+      if ($image = $request->file('image')) {
+        $destinationPath = 'images/product/';
+        $formattedNumber = str_pad($product->id, 5, '0', STR_PAD_LEFT);
+        $filename = $image->getClientOriginalName();
+        $productImage = $formattedNumber. "_" .md5($filename . time()) . "." . $image->getClientOriginalExtension();
+        $image->move($destinationPath, $productImage);
+        $product->image = $productImage;
+        $product->save();
+      }
+
+      return redirect()->route('products.index', withLang(['product' => $product->id]));
     }
-    // Optionally, you can return a response to indicate success or redirect to a different page.
-    return redirect()->route('products.show', withLang(['product' => $product->id]));
-  }
 
   /**
    * Display the specified resource.
@@ -139,19 +157,48 @@ class ProductController extends Controller
     $product = $product->with('brand', 'series', 'color', 'modelType', 'storage')->findOrfail($product->id);
     return view('products.show', ['product' => $product]);
   }
-
   /**
    * Show the form for editing the specified resource.
    */
-  public function edit(string $lang, Product $product) {
-    
-  }
+  public function edit(string $lang, Product $product)
+  {
+    $brands = Brand::all();
+    $series = Series::all();
+    $colors = Color::all();
+    $modelTypes = ModelType::all();
+    $modelTypes = ModelType::pluck('name', 'id');
+    $storages = Storage::all();
+    $networks = Network::all();
+    $networks = Network::pluck('name', 'id');
+    $typeOfMachines = Product::TYPE_OF_MACHINE;
+    $conditions = Product::CONDITIONS;
+    $statuses = Product::getStatuses();
+   
 
+    return view('products.edit', compact(
+      'product',
+      'brands',
+      'series',
+      'colors',
+      'modelTypes',
+      'storages',
+      'typeOfMachines',
+      'networks',
+      'conditions',
+      'statuses',
+      
+    ));
+  }
   /**
    * Update the specified resource in storage.
    */
-  public function update(ProductRequest $request, string $lang, Product $product) {
-    
+  public function update(Request $request, string $lang, $id)
+  {
+    $product = Product::findOrFail($id);
+
+    $product->update($request->all());
+
+    return redirect()->route('products.index', $lang);
   }
 
   public function getSeriesBybrand(string $lang, string $id)

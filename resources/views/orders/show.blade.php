@@ -43,15 +43,11 @@
                         <i class="fa-solid fa-location-pin text-gray-400 w-4"></i>
                         <span>{{ $company->address }}</span>
                     </div>
-                    <div class="flex items-start gap-2 mt-1">
-                        <i class="fa-solid fa-note-sticky text-gray-400 w-4 mt-0.5"></i>
-                        <span class="text-gray-400 text-xs">{{ $company->default_loan_note }}</span>
-                    </div>
                 </div>
                 <div class="text-right flex flex-col gap-1">
                     <p><span class="text-gray-400">Invoice:</span> <span class="font-semibold">#{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</span></p>
-                    <p><span class="text-gray-400">Issued Date:</span> {{ $order->created_at->format('d/m/Y') }}</p>
-                    <p><span class="text-gray-400">Order Date:</span> {{ \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') }}</p>
+                    <p><span class="text-gray-400">Issued Date:</span> {{ $order->created_at ? $order->created_at->format('d/m/Y') : '—' }}</p>
+                    <p><span class="text-gray-400">Order Date:</span> {{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d/m/Y') : '—' }}</p>
                     <p><span class="text-gray-400">Staff:</span> {{ $order->employee->name ?? Auth::user()->name ?? '—' }}</p>
                 </div>
             </div>
@@ -75,7 +71,7 @@
                 <h5 class="text-lg font-bold text-gray-700 tracking-widest uppercase">Invoice</h5>
             </div>
 
-            {{-- Order Items Tab{{ $company->default_invoice_note }}le --}}
+            {{-- Order Items Table --}}
             <div class="overflow-x-auto mb-6">
                 <table class="w-full text-sm">
                     <thead>
@@ -146,7 +142,9 @@
             {{-- Footer note --}}
             <div class="text-center text-xs text-gray-400 pb-2">
                 <p>Thank you for your purchase!</p>
-                    <p class="mt-1">{{ $company->default_loan_note }}</p>
+                @if($company->default_invoice_note)
+                    <p class="mt-1">{{ $company->default_invoice_note }}</p>
+                @endif
             </div>
 
         </div>

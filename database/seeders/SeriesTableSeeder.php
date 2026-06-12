@@ -19,6 +19,13 @@ class SeriesTableSeeder extends Seeder
             'iPhone 15 Plug',
             'iPhone 15 Pro',
             'iPhone 15 Ultra',
+            'iPhone 15 Promax',
+            'iPhone 16',
+            'iPhone 16 Pro',
+            'iPhone 16 Promax',
+            'iPhone 17',
+            'iPhone 17 Pro',
+            'iPhone 17 Promax',
         ];
         $brand = Brand::where('name', 'APPLE')->first();
         foreach ($series as $seriesName) {

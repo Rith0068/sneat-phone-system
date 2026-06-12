@@ -10,7 +10,7 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
-    const CONDITION = [
+    const CONDITIONS = [
       1 => 'Used',
       2 => 'New'
     ];
@@ -110,7 +110,7 @@ class Product extends Model
 
     public function getConditionNameAttribute()
     {
-      return self::CONDITION[$this->condition];
+      return self::CONDITIONS[$this->condition];
     }
 
     public function getTypeOfMachineNameAttribute()
@@ -127,9 +127,9 @@ class Product extends Model
     public function getConditionLabelBadgesNameAttribute()
     {
       if($this->condition == self::CONDITION_USED){
-        return '<span class="badge bg-label-primary">'.self::CONDITION[$this->condition].'</span>';
+        return '<span class="badge bg-label-primary">'.self::CONDITIONS[$this->condition].'</span>';
       }else{
-        return '<span class="badge bg-label-secondary">'.self::CONDITION[$this->condition].'</span>';
+        return '<span class="badge bg-label-secondary">'.self::CONDITIONS[$this->condition].'</span>';
       }
     }
 
