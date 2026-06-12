@@ -41,7 +41,7 @@
           @foreach ($products as $key => $product)
           <div class="col">
               <div class="card h-100">
-              <img class="card-img-top img-product" src="{{ $product->image_name }}" alt="Product image" onError="this.onerror=null;this.src='{{ asset('/assets/img/blank-product.svg') }}';">
+              <img class="card-img-top img-product" src="{{ $product->image_name ? asset('uploads/products/' . $product->image_name) : asset('assets/img/blank-product.svg') }}">
               <div class="card-body">
                   <h5 class="card-title"><strong>{{ $product->product_name ?? ''}}</strong> </h5>
                   <p class="card-text">
@@ -60,12 +60,12 @@
                   <div class="text-end">
                   <span class="text-end">
                       @can('product-list')
-                      <a href="{{ route('products.show', withLang(['product' => $product->id])) }}" class="btn btn-icon btn-outline-secondary">
+                      <a href="{{ route('products.show', withLang(['id' => $product->id])) }}" class="btn btn-icon btn-outline-secondary">
                           <span class="tf-icons bx bx-detail"></span>
                       </a>
                       @endcan
                       @can('product-edit')
-                        <a href="{{ route('products.edit', withLang(['product' => $product->id])) }}" class="btn btn-icon btn-outline-secondary">
+                        <a href="{{ route('products.edit', withLang(['id' => $product->id])) }}" class="btn btn-icon btn-outline-secondary">
                             <span class="tf-icons bx bx-edit-alt"></span>
                         </a>
                       @endcan
@@ -93,12 +93,12 @@
     @else
         <!-- List Product Table -->
         <div class="card">
-          <div class="card-header"> 
+          <div class="card-header "> 
             <h5>{{ __('product.list_title')}}</h5> 
             <h6>ផលិតផលក្នុងស្តុកសរុប : ក្នុងស្តុក {{$totalProductAvailable}} (លក់ចេញ:{{$totalProductSold}})</h6>
           </div>
           <div class="table-responsive text-nowrap">
-              <table class="table">
+              <table class="table ">
                   <thead>
                       <tr>
                           <th></th>
@@ -173,7 +173,7 @@
                               </td>
                           </tr>
                           @empty
-                            <tr class="no-data">
+                            <tr class="no-data ">
                               <th colspan="10" class="p-5 text-center">{{ __('common.lbl_no_data') }}</th>
                             </tr>
                         @endforelse
@@ -191,7 +191,7 @@
                           <th>{{__('product.condition.title')}}</th>
                           <th>{{__('product.machine')}}</th>
                           <th>{{__('product.status')}}</th>
-                          @can(['product-list'],['product-edit'], ['product-delete'], ['order-creat'])
+                          @can(['product-list'],['product-edit'], ['product-delete'], ['order-create'])
                           <th>Actions</th>
                           @endcan
                       </tr>
