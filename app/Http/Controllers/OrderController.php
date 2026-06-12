@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\Employee;
 use App\Models\Brand;
 use App\Models\Series;
+use App\Models\Employee;
 use App\Models\Color;
 use App\Models\ModelType;
 use App\Models\Storage;

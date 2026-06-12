@@ -3,7 +3,7 @@
     <div class="app-brand custom">
         <a href="{{ route('home') }}" class="app-brand-link">
             <span class="app-brand-logo custom">
-                <img src="{{ $company->image_logo }}" alt="logo" width="50px"/>
+                <img src="{{ asset('assets/img/favicon/favicon.ico') }}" alt="logo" width="50px"/>
             </span>
             <span class="app-brand-text custom menu-text fw-bolder ms-2">{{ $company->name ?? ''}}</span>
         </a>
@@ -171,7 +171,11 @@
                 @endcan
                 @can('order-list')
                   <li class="menu-item{{ (request()->routeIs('sales.index')) ? ' active' : '' }}">
+
+                      <a href="{{ route('sales.create', withLang()) }}" class="menu-link">
+
                       <a href="{{ route('sales.index', withLang()) }}" class="menu-link">
+
                           <div data-i18n="{{__('sidebar.shop.orders.invoices_list')}}">{{__('sidebar.shop.orders.invoices_list')}}</div>
                       </a>
                   </li>
