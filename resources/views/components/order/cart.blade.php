@@ -71,7 +71,11 @@
                 </div>
                 <div class="flex justify-start text-start">
                     <p class="text-gray-500 text-xs leading-relaxed line-clamp-2">
-                        @if($product->note){{ $product->note }}, @endif
+                        @if($product->condition == 1)
+                            Used
+                        @elseif($product->condition == 2)
+                            New
+                        @endif
                         @if($product->brand){{ $product->brand->name }} @endif
                         @if($product->storage), {{ $product->storage->name }}@endif
                         @if($product->color), {{ $product->color->name }}@endif

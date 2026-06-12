@@ -67,14 +67,22 @@ class OrderController extends Controller
         ));
     }
 
-    public function show(string $lang, Order $order)
+    public function show($lang, Request $request)
     {
-        $company = CompanySetting::first();
-        $order->load('customer', 'employee');
+        $order = Order::with([
+                    'customer',
+                    'employee',
+                    'orderDetails.product.storage',
+                    'orderDetails.product.color'
+                ])->find($request->order);
 
-        $order_details = OrderDetail::where('order_id', $order->id)
-            ->with('product.storage', 'product.color')
-            ->get();
+        // Guard against null
+        if (!$order) {
+            abort(404, 'Order not found.');
+        }
+
+        $order_details = $order->orderDetails;
+        $company = CompanySetting::first();
 
         return view('orders.show', compact('order', 'order_details', 'company'));
     }
@@ -96,12 +104,12 @@ class OrderController extends Controller
 
         foreach ($orderDetails as $detail) {
             Product::where('id', $detail->product_id)->update([
-                'status'     => 1,
+                'status' => 1,
             ]);
         }
+
         $order->delete();
         $orderDetails->each(fn($detail) => $detail->update(['deleted_at' => now()]));
-        
         $order->update(['deleted_at' => now()]);
 
         return redirect()->route('sales.index', withLang())->with('success', 'Sale deleted successfully');
@@ -139,7 +147,9 @@ class OrderController extends Controller
                     ->orWhere('product_name', 'like', "%{$search}%")
                     ->orWhere('product_imei', 'like', "%{$search}%")
                     ->orWhere('selling_price', 'like', "%{$search}%")
-                    ->orWhereHas('brand', function ($query) use ($search) {$query->where('name', 'like', "%{$search}%");});
+                    ->orWhereHas('brand', function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -149,11 +159,12 @@ class OrderController extends Controller
         return view('orders.create', compact(
             'products',
             'product',
-            'brands',  
+            'brands',
             'customers',
             'search'
         ));
     }
+
     public function store(Request $request, string $lang)
     {
         $request->validate([
@@ -206,6 +217,7 @@ class OrderController extends Controller
             'product_price'   => $request->product_price,
         ]);
     }
+
     public function createSale()
     {
         $customers = Customer::all();
@@ -216,16 +228,15 @@ class OrderController extends Controller
             'products'
         ));
     }
+
     public function storeSale(Request $request)
     {
         Order::create([
-
-            'name' => $request->name,
+            'name'        => $request->name,
             'customer_id' => $request->customer_id,
-
             'employee_id' => $request->employee_id,
-            'update_id' => $request->update_id,
-            'create_id' => $request->create_id
+            'update_id'   => $request->update_id,
+            'create_id'   => $request->create_id,
         ]);
 
         return redirect()->route('sales.index', ['lang' => app()->getLocale()]);
