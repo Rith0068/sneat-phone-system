@@ -68,7 +68,7 @@ class Product extends Model
       'purchase_date',
       'status',
       'note',
-      'image'
+ 
   ];
 
     protected $dates = ['purchase_date', 'deleted_at'];

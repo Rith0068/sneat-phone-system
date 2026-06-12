@@ -93,9 +93,10 @@ Route::group([
 
     Route::group(['prefix' => 'sale', 'as' => 'sales.'], function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
-        Route::get('/create', [OrderController::class, 'create'])->name('create');
+        Route::post('/store', [OrderController::class, 'storeSale'])->name('store');
+        Route::get('/create', [OrderController::class, 'createSale'])->name('create');
         Route::get('/show', [OrderController::class, 'show'])->name('show');
-        Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy'); // fixed
+        Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
     });
     Route::group(['prefix'=>'cart','as'=>'carts.'], function(){
       Route::post('/store', [CartController::class, 'store'])->name('store');
@@ -203,7 +204,6 @@ Route::group([
     Route::put('company/', [CompanySettingController::class, 'update'])->name('company.update');
 });
 
-  Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
 
   //Report Route
   Route::group(['prefix' => 'report', 'as' => 'reports.'], function () {
@@ -242,14 +242,6 @@ Route::group([
     Route::get('/profile/edit/password', [UserController::class, 'editPassword'])->name('edit.profile.password');
     Route::post('/profile/update/password', [UserController::class, 'updatePassword'])->name('update.profile.password');
   });
-  Route::group(['prefix' => 'order', 'as' => 'orders.'], function () {
-    Route::get('/create', [OrderController::class, 'index'])->name('create');
-    Route::get('/', [OrderController::class, 'index'])->name('index');
-  });
-  Route::group(['prefix' => 'sale', 'as' => 'sales.'], function () {
-    Route::get('/create', [OrderController::class, 'index'])->name('create');
-    Route::get('/', [OrderController::class, 'index'])->name('index');
-  });
   Route::group(['prefix' => 'cart', 'as' => 'carts.'], function () {
     Route::post('/store', [CartController::class, 'store'])->name('store');
     Route::delete('/destroy', [CartController::class, 'destroy'])->name('destroy');
@@ -270,67 +262,7 @@ Route::group([
       Route::post('/update/{sale}', [ExpenseCategoryController::class, 'update'])->name('update');
     });
   });
-
-  Route::group(['prefix' => 'model-type', 'as' => 'model_type.'], function () {
-    Route::get('/', [ModelTypeController::class, 'index'])->name('index');
-    Route::get('/create', [ModelTypeController::class, 'create'])->name('create');
-    Route::post('/store', [ModelTypeController::class, 'store'])->name('store');
-    Route::post('/update', [ModelTypeController::class, 'update'])->name('update');
-  });
-  Route::group(['prefix' => 'network', 'as' => 'network.'], function () {
-    Route::get('/', [NetworkController::class, 'index'])->name('index');
-    Route::get('/create', [NetworkController::class, 'create'])->name('create');
-    Route::post('/store', [NetworkController::class, 'store'])->name('store');
-    Route::post('/update', [NetworkController::class, 'update'])->name('update');
-  });
-  Route::group(['prefix' => 'serial', 'as' => 'serial.'], function () {
-    Route::get('/', [SerialController::class, 'index'])->name('index');
-    Route::get('/create', [SerialController::class, 'create'])->name('create');
-    Route::post('/store', [SerialController::class, 'store'])->name('store');
-    Route::post('/update', [SerialController::class, 'update'])->name('update');
-  });
-  Route::group(['prefix' => 'brand', 'as' => 'brand.'], function () {
-    Route::get('/', [BrandController::class, 'index'])->name('index');
-    Route::get('/create', [BrandController::class, 'create'])->name('create');
-    Route::post('/store', [BrandController::class, 'store'])->name('store');
-    Route::post('/update', [BrandController::class, 'update'])->name('update');
-  });
-  Route::group(['prefix' => 'color', 'as' => 'color.'], function () {
-    Route::get('/', [ColorController::class, 'index'])->name('index');
-    Route::get('/create', [ColorController::class, 'create'])->name('create');
-    Route::post('/store', [ColorController::class, 'store'])->name('store');
-    Route::post('/update', [ColorController::class, 'update'])->name('update');
-  });
-  Route::group(['prefix' => 'storage', 'as' => 'storage.'], function () {
-    Route::get('/', [StorageController::class, 'index'])->name('index');
-    Route::get('/create', [StorageController::class, 'create'])->name('create');
-    Route::post('/store', [StorageController::class, 'store'])->name('store');
-    Route::post('/update', [StorageController::class, 'update'])->name('update');
-  });
-  Route::group(['prefix' => 'loan', 'as' => 'loans.'], function () {
-    Route::get('/', [LoanController::class, 'index'])->name('index');
-    Route::get('/create', [LoanController::class, 'create'])->name('create');
-    Route::post('/', [LoanController::class, 'store'])->name('store');
-    Route::get('/{loan}/edit', [LoanController::class, 'edit'])->name('edit');
-    Route::put('/{loan}', [LoanController::class, 'update'])->name('update');
-    Route::delete('/{loan}', [LoanController::class, 'destroy'])->name('destroy');
-    Route::get('{loan}/invoice/', [LoanController::class, 'invoice'])->name('invoice');
-    Route::get('{loan}/invoice/pdf', [LoanController::class, 'invoicePdf'])->name('invoice.pdf');
-    Route::get('{loan}/agreement/', [LoanController::class, 'agreement'])->name('agreement');
-    Route::group(['prefix' => 'payment', 'as' => 'payments.'], function () {
-      Route::get('/', [LoanPaymentController::class, 'index'])->name('index');
-      Route::get('/create', [LoanPaymentController::class, 'create'])->name('create');
-      Route::post('/', [LoanPaymentController::class, 'store'])->name('store');
-      Route::get('/{loanPayment}/edit', [LoanPaymentController::class, 'edit'])->name('edit');
-      Route::get('/{loanPayment}/invoice', [LoanPaymentController::class, 'invoice'])->name('invoice');
-      Route::get('/{loanPayment}/invoice/pdf', [LoanPaymentController::class, 'invoicePdf'])->name('invoice.pdf');
-      Route::put('/{loanPayment}', [LoanPaymentController::class, 'update'])->name('update');
-      Route::delete('/{loanPayment}', [LoanPaymentController::class, 'destroy'])->name('destroy');
-      Route::get('{loan}/list', [LoanController::class, 'list'])->name('list');
-      Route::get('/{loan}/pdf', [LoanController::class, 'pdf'])->name('pdf');
-      Route::get('/late', [LoanPaymentController::class, 'late'])->name('late');
-    });
-  });
+  
   Route::group(['prefix' => 'customer', 'as' => 'customers.'], function () {
     Route::get('/', [CustomerController::class, 'index'])->name('index');
     Route::get('/edit/{id}', [CustomerController::class, 'edit'])->name('edit');

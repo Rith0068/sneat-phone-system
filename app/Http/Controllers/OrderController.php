@@ -57,7 +57,7 @@ class OrderController extends Controller
             }
         }
 
-        $orders = $query->orderBy('order_date', 'desc')->paginate(20);
+        $orders = $query->orderBy('order_date', 'desc')->paginate(20)->appends($parameterNames);
         session(['printInvoiceId' => null]);
 
         return view('orders.index', compact(
@@ -205,5 +205,29 @@ class OrderController extends Controller
             'product_color'   => $request->product_color,
             'product_price'   => $request->product_price,
         ]);
+    }
+    public function createSale()
+    {
+        $customers = Customer::all();
+        $products = Product::available()->get();
+
+        return view('orders.create-sale', compact(
+            'customers',
+            'products'
+        ));
+    }
+    public function storeSale(Request $request)
+    {
+        Order::create([
+
+            'name' => $request->name,
+            'customer_id' => $request->customer_id,
+
+            'employee_id' => $request->employee_id,
+            'update_id' => $request->update_id,
+            'create_id' => $request->create_id
+        ]);
+
+        return redirect()->route('sales.index', ['lang' => app()->getLocale()]);
     }
 }
