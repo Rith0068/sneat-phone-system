@@ -23,7 +23,7 @@
                         @endcan
                     @endcan
                 </ul>
-                <form id="formAccountSettings" method="POST" action="{{ route('users.update.password', withLang(['id' => $user->id]))}}" enctype="multipart/form-data">
+                <form id="formAccountSettings" method="POST" action="{{ route('users.update.profile.password', withLang(['id' => $user->id]))}}" enctype="multipart/form-data">
                     @csrf
                     <div class="card mb-4">
                         <h5 class="card-header">Update Password</h5>

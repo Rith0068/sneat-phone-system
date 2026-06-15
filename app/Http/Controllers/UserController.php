@@ -87,18 +87,28 @@ class UserController extends Controller
         ]);
     }
 
-    public function updatePassword(Request $request)
-    {
-        $request->validate([
-            'new_password' => 'required|confirmed',
-        ]);
-        $user = User::findOrfail(Auth::id());
-        if (Hash::check($request->current_password, $user->password)) {
-            $user->password = Hash::make($request->new_password);
-            $user->save();
-            return redirect()->route('users.edit.password', withLang(['id' => $user->id]))->with('success', 'Password updated successfully');
-        } else {
-            return redirect()->route('users.edit.password', withLang(['id' => $user->id]))->with('error', 'Current password is incorrect');
-        }
-    }
+  
+public function updatePassword(Request $request)
+{
+    $request->validate([
+
+        'current_password' => 'required|current_password',
+        
+        'new_password' => 'required|confirmed|min:8',
+    ]);
+
+    $user = User::findOrFail(Auth::id());
+    $user->password = Hash::make($request->new_password);
+        $user->save(); 
+   
+
+        return redirect()
+            ->route('users.edit.profile', withLang(['id' => $user->id]))
+            ->with('success', 'Password updated successfully');
+
+          }  
+
+        
+    
 }
+

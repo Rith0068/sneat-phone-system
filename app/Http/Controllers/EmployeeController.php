@@ -8,6 +8,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Lang;
 
 class EmployeeController extends Controller
 {
@@ -132,7 +133,7 @@ class EmployeeController extends Controller
         return redirect()->route('users.index', withLang())->with('success', 'Branch soft deleted successfully');
     }
 
-    public function editPassword($id)
+     public function editPassword(  $id)
     {
         $user = User::with('employee')->findOrfail($id);
         return view('employees.edit-password', [

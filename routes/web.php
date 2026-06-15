@@ -86,10 +86,12 @@ Route::group([
     Route::get('/password/edit/{id}', [EmployeeController::class, 'editPassword'])->name('edit.password');
     Route::post('/password/update/{id}', [EmployeeController::class, 'updatePassword'])->name('update.password');
     Route::get('/profile', [UserController::class, 'edit'])->name('edit.profile');
-    Route::post('/profile/update', [UserController::class, 'update'])->name('update.profile');
+    Route::post('/profile/update', [UserController::class, 'update'])->name('update.profile');  
     Route::get('/profile/edit/password', [UserController::class, 'editPassword'])->name('edit.profile.password');
     Route::post('/profile/update/password', [UserController::class, 'updatePassword'])->name('update.profile.password');
   });
+
+ 
   Route::group(['prefix' => 'order', 'as' => 'orders.'], function () {
     Route::get('/create', [OrderController::class, 'index'])->name('create');
     Route::get('/', [OrderController::class, 'index'])->name('index');
